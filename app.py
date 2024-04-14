@@ -225,46 +225,44 @@ with col2:
 # Create two columns for the second row of charts
 col3, col4 = st.columns(2)
 
-# Retrieve data from the 'HR Helpdesk' sheet
-sheet3 = workbook.worksheet('HR Helpdesk')
-data3 = sheet3.get_all_values()[1:]
-headers3 = data3[0]
-data_rows3 = data3[1:]
-df3 = pd.DataFrame(data_rows3, columns=headers3)
-
-# Melt the DataFrame and preprocess data for the 'HR Helpdesk' chart
-df3_melted = df3.melt(id_vars=[headers3[0]], value_vars=headers3[1:],
-                      var_name='Month', value_name='Queries/Requests')
-df3_melted['Queries/Requests'] = pd.to_numeric(df3_melted['Queries/Requests'])
-month_order = {month: index for index, month in enumerate(calendar.month_abbr)}
-df3_melted['Month'] = pd.Categorical(df3_melted['Month'], categories=month_order.keys(), ordered=True)
-df3_melted = df3_melted.sort_values(by='Month')
+# Retrieve data for the 'Queries/Request Received Over Months' chart
+data_queries = {
+    'Month': ['Jan', 'Feb', 'Mar'],
+    'Queries/Requests': [10, 12, 14]
+}
+df_queries = pd.DataFrame(data_queries)
 
 # Third chart: Queries/Request Received Over Months
 with col3:
     st.markdown("<h3 style='text-align: center; color: #00b0ff;'>📈 Queries/Request Received Over Months</h3>", unsafe_allow_html=True)
-    fig3 = px.line(df3_melted, x='Month', y='Queries/Requests',
-                   title='Monthly Queries/Requests',
-                   labels={'Month': 'Month', 'Queries/Requests': 'Number of Queries/Requests'})
-    fig3.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
-    st.plotly_chart(fig3)
+    fig_queries = px.bar(df_queries, x='Month', y='Queries/Requests',
+                         title='Queries/Request Received Over Months',
+                         labels={'Month': 'Month', 'Queries/Requests': 'Number of Queries/Requests'})
+    fig_queries.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+    st.plotly_chart(fig_queries)
 
 # Retrieve data from the 'Attrition data - Month & Department wise' sheet
 attrition_data_sheet = workbook.worksheet('Attrititon data - Month & Department wise')
 attrition_data = attrition_data_sheet.get_all_records()
 df_attrition = pd.DataFrame(attrition_data)
 
-# Melt the DataFrame for the 'Attrition data - Month & Department wise' chart
-df_attrition_melted = df_attrition.melt(id_vars=['Department'], value_vars=['Jan', 'Feb', 'Mar'],
-                                        var_name='Month', value_name='Attrition Count')
+# Retrieve data from the 'Attrition data - Month & Department wise' sheet
+attrition_data_sheet = workbook.worksheet('Attrititon data - Month & Department wise')
+attrition_data = attrition_data_sheet.get_all_records()
+df_attrition = pd.DataFrame(attrition_data)
 
-# Fourth chart: Attrition Data - Month & Department Wise
+# Calculate the total attrition count by department
+df_attrition['Total Attrition'] = df_attrition['Jan'] + df_attrition['Feb'] + df_attrition['Mar']
+
+# Fourth chart: Attrition by Department
 with col4:
-    st.markdown("<h3 style='text-align: center; color: #00b0ff;'>📉 Attrition Data - Month & Department Wise</h3>", unsafe_allow_html=True)
-    fig_attrition = px.bar(df_attrition_melted, x='Month', y='Attrition Count', color='Department',
-                           title='Monthly Attrition Count by Department')
+    st.markdown("<h3 style='text-align: center; color: #00b0ff;'>📉 Attrition by Department</h3>", unsafe_allow_html=True)
+    fig_attrition = px.bar(df_attrition, y='Department', x='Total Attrition',
+                           orientation='h',
+                           title='Attrition by Department')
     fig_attrition.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig_attrition)
+
 
 # Create two columns for the third row of charts
 col5, col6 = st.columns(2)
@@ -289,6 +287,7 @@ with col5:
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
     )
     st.plotly_chart(fig_gender)
+
 
 # Retrieve data from the 'Engagement details - Month wise' sheet
 engagement_details_sheet = workbook.worksheet('Engagement details - Month wise')
