@@ -182,7 +182,7 @@ df2.columns = [col.strip() for col in df2.columns]
 st.set_page_config(page_title='HR Dashboard', layout='wide')
 
 # Add a title and introduction
-st.markdown("<h1 style='text-align: center; color: #ff4b4b;'>🚀 Human Resources Dashboard 📊</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #e63946;'>🚀 Human Resources Dashboard 📊</h1>", unsafe_allow_html=True)
 st.write("<p style='text-align: center; color: #ff7f50;'>This dashboard provides an overview of key HR metrics and insights.</p>", unsafe_allow_html=True)
 
 # Create two columns for the first row of charts
@@ -192,11 +192,14 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("<h3 style='text-align: center; color: #00b0ff;'>🔍 Reasons for Department Change</h3>", unsafe_allow_html=True)
     fig1 = px.bar(df1, x='Department', y=['Career Growth/ Better Opp.', 'Performance issues', 'Health reasons', 'Higher studies'],
-                  title='Reasons for Department Change',
-                  labels={'value': 'Number of Responses', 'variable': 'Categories'},
-                  barmode='group')
-    fig1.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                title='Reasons for Department Change',
+                labels={'value': 'Number of Responses', 'variable': 'Categories'},
+                barmode='group',
+                color_discrete_sequence=['#4e79a7', '#59a14f', '#76b7b2', '#edc948'],
+                text='value')  # This parameter specifies which data to display as text
+    fig1.update_traces(texttemplate='%{text}', textposition='outside')  # Remove any format specification to show whole numbers
     st.plotly_chart(fig1)
+
 
 # Second chart: Employee Connect Status by Department
 employee_connects_sheet = workbook.worksheet('Employee Connects')
@@ -219,8 +222,13 @@ with col2:
     fig_employee_connects = px.bar(df_employee_connects, x='Department', y=['Red', 'Amber', 'Green'],
                                 title='Employee Connects - RAG Status by Department',
                                 labels={'value': 'Number of Cases', 'variable': 'Status'},
-                                barmode='group')
+                                barmode='group',
+                                color_discrete_sequence=['#e15759', '#f28e2b', '#4e79a7'],
+                                text='value')
+    fig_employee_connects.update_traces(texttemplate='%{text}', textposition='outside')  # Using whole numbers
     st.plotly_chart(fig_employee_connects)
+
+
 
 # Create two columns for the second row of charts
 col3, col4 = st.columns(2)
@@ -236,10 +244,13 @@ df_queries = pd.DataFrame(data_queries)
 with col3:
     st.markdown("<h3 style='text-align: center; color: #00b0ff;'>📈 Queries/Request Received Over Months</h3>", unsafe_allow_html=True)
     fig_queries = px.bar(df_queries, x='Month', y='Queries/Requests',
-                         title='Queries/Request Received Over Months',
-                         labels={'Month': 'Month', 'Queries/Requests': 'Number of Queries/Requests'})
-    fig_queries.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                        title='Queries/Request Received Over Months',
+                        labels={'Month': 'Month', 'Queries/Requests': 'Number of Queries/Requests'},
+                        color_discrete_sequence=['#76b7b2', '#59a14f', '#edc948'],
+                        text='Queries/Requests')
+    fig_queries.update_traces(texttemplate='%{text}', textposition='outside')  # Set the text to display as whole numbers
     st.plotly_chart(fig_queries)
+
 
 # Retrieve data from the 'Attrition data - Month & Department wise' sheet
 attrition_data_sheet = workbook.worksheet('Attrititon data - Month & Department wise')
@@ -258,10 +269,13 @@ df_attrition['Total Attrition'] = df_attrition['Jan'] + df_attrition['Feb'] + df
 with col4:
     st.markdown("<h3 style='text-align: center; color: #00b0ff;'>📉 Attrition by Department</h3>", unsafe_allow_html=True)
     fig_attrition = px.bar(df_attrition, y='Department', x='Total Attrition',
-                           orientation='h',
-                           title='Attrition by Department')
-    fig_attrition.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                        orientation='h',
+                        title='Attrition by Department',
+                        color_discrete_sequence=['#e15759', '#76b7b2', '#f28e2b', '#ff9da7'],
+                        text='Total Attrition')
+    fig_attrition.update_traces(texttemplate='%{text}', textposition='outside')  # Adjust text template to show whole numbers
     st.plotly_chart(fig_attrition)
+
 
 
 # Create two columns for the third row of charts
@@ -281,6 +295,7 @@ with col5:
     values = df_gender_diversity['Count']
 
     fig_gender = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.5)])
+    fig_gender.update_traces(marker=dict(colors=['#59a14f', '#76b7b2']))  # Here you adjust colors as needed
     fig_gender.update_layout(
         title='Gender Diversity',
         annotations=[dict(text='', x=0.5, y=0.5, font_size=20, showarrow=False)],
